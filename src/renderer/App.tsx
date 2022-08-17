@@ -9,7 +9,8 @@ var hotkeys: Array<any> = []
 var config: any = {
   keyboardDelay: 10,
   mouseDelay: 6,
-  customCommand1ScrollRate: 50
+  customCommand1ScrollRate: 50,
+  scrollIntensity: 100
 }
 
 interface IMainAppProps {
@@ -18,7 +19,8 @@ interface IMainAppState {
   update: boolean,
   textFieldKeyboardDelay: number,
   textFieldMouseDelay: number,
-  customCommand1ScrollRate: number
+  customCommand1ScrollRate: number,
+  scrollIntensity: number,
 }
 
 class MainApp extends React.Component<IMainAppProps,IMainAppState> {
@@ -28,7 +30,8 @@ class MainApp extends React.Component<IMainAppProps,IMainAppState> {
       update: false,
       textFieldKeyboardDelay: config.keyboardDelay,
       textFieldMouseDelay: config.mouseDelay,
-      customCommand1ScrollRate: config.customCommand1ScrollRate
+      customCommand1ScrollRate: config.customCommand1ScrollRate,
+      scrollIntensity: config.scrollIntensity
     };
   }
   
@@ -144,8 +147,8 @@ class MainApp extends React.Component<IMainAppProps,IMainAppState> {
             color='error'
             style={{width: '120px'}}
             onChange={(e:any) => {
-              this.setState({textFieldKeyboardDelay: e.target.value})
-              config.keyboardDelay = e.target.value
+              this.setState({textFieldKeyboardDelay: Number(e.target.value)})
+              config.keyboardDelay = Number(e.target.value)
               rendererEvent.emit('saveConfig', config)
             }}
           />
@@ -153,14 +156,29 @@ class MainApp extends React.Component<IMainAppProps,IMainAppState> {
           <TextField
             error
             sx={{ input: { color: 'white' }}}
-            label="Mousescroll Delay"
+            label="Mouse Delay"
             type="number"
             variant="filled"
             value={this.state.textFieldMouseDelay}
             style={{width: '120px'}}
             onChange={(e:any) => {
-              this.setState({textFieldMouseDelay: e.target.value})
-              config.mouseDelay = e.target.value
+              this.setState({textFieldMouseDelay: Number(e.target.value)})
+              config.mouseDelay = Number(e.target.value)
+              rendererEvent.emit('saveConfig', config)
+            }}
+          />
+          <div style={{width: '10px'}}></div>
+          <TextField
+            error
+            sx={{ input: { color: 'white' }}}
+            label="Scroll Intensity"
+            type="number"
+            variant="filled"
+            value={this.state.scrollIntensity}
+            style={{width: '120px'}}
+            onChange={(e:any) => {
+              this.setState({scrollIntensity: Number(e.target.value)})
+              config.scrollIntensity = Number(e.target.value)
               rendererEvent.emit('saveConfig', config)
             }}
           />
@@ -177,8 +195,8 @@ class MainApp extends React.Component<IMainAppProps,IMainAppState> {
             color='error'
             style={{width: '120px'}}
             onChange={(e:any) => {
-              this.setState({customCommand1ScrollRate: e.target.value})
-              config.customCommand1ScrollRate = e.target.value
+              this.setState({customCommand1ScrollRate: Number(e.target.value)})
+              config.customCommand1ScrollRate = Number(e.target.value)
               rendererEvent.emit('saveConfig', config)
             }}
           />

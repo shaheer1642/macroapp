@@ -21,11 +21,14 @@ import { left } from '@nut-tree/nut-js';
 
 const appDocPath = Os.homedir() + '/Documents/MacroApp/'
 
+var hotkeys: any = []
+var config: any = {keyboardDelay: 10, mouseDelay: 6, customCommand1ScrollRate: 20, scrollIntensity: 100}
+
 try {
   fs.mkdirSync(appDocPath);
 } catch (e) {}
 if (!fs.existsSync(appDocPath + 'hotkeys.json')) fs.writeFileSync(appDocPath + 'hotkeys.json','[{"commands":["Select"],"hotkey":"Select"}]')
-if (!fs.existsSync(appDocPath + 'config.json')) fs.writeFileSync(appDocPath + 'config.json','{"keyboardDelay": 10, "mouseDelay": 6}')
+if (!fs.existsSync(appDocPath + 'config.json')) fs.writeFileSync(appDocPath + 'config.json','{"keyboardDelay": 10, "mouseDelay": 6, "customCommand1ScrollRate": 50, "scrollIntensity": 50}')
 
 
 class AppUpdater {
@@ -38,17 +41,24 @@ class AppUpdater {
 
 let mainWindow: BrowserWindow | null = null;
 
-var hotkeys: any = []
-var config: any = {keyboardDelay: 10, mouseDelay: 6, customCommand1ScrollRate: 20}
-
 ipcMain.on('ipc-example', async (event, arg) => {
   if ((arg as any)[0].query == 'fetchConfig') {
-    fs.readFile(appDocPath + 'config.json', 'utf8', function(err, data){
-      config = JSON.parse(data)
+    fs.readFile(appDocPath + 'config.json', 'utf8', function(err, data) {
+      var writeFlag = false;
+      var fileConfig = JSON.parse(data)
+      Object.keys(config).forEach(key => {
+        if (!Object.keys(fileConfig).includes(key)) {
+          writeFlag = true;
+          fileConfig[key] = config[key]
+        }
+      })
+      config = fileConfig
+      if (writeFlag)
+        fs.writeFileSync(appDocPath + 'config.json',JSON.stringify(config))
       console.log('$$$$$$$$$$$read file config.json ')
       event.reply('ipc-example', [{
         query: 'fetchConfig',
-        data: JSON.parse(data)
+        data: config
       }]);
     });
   }
@@ -224,7 +234,7 @@ function registerGlobalHotkeys() {
             await keyboard.pressKey(Key.S)
   
             for (var i=0; i<Number(config.customCommand1ScrollRate); i++) {
-              await mouse.scrollDown(150)
+              await mouse.scrollDown(Number(config.scrollIntensity))
             }
   
             await keyboard.releaseKey(Key.S)
@@ -250,16 +260,16 @@ function registerGlobalHotkeys() {
                 releasekeys.push(command)
               }
               else if (command.toLowerCase() == 'wheeldown') {
-                await mouse.scrollDown(100)
+                await mouse.scrollDown(Number(config.scrollIntensity))
               }
               else if (command.toLowerCase() == 'wheelup') {
-                await mouse.scrollUp(100)
+                await mouse.scrollUp(Number(config.scrollIntensity))
               }
               else if (command.toLowerCase() == 'wheelleft') {
-                await mouse.scrollLeft(100)
+                await mouse.scrollLeft(Number(config.scrollIntensity))
               }
               else if (command.toLowerCase() == 'wheelright') {
-                await mouse.scrollRight(100)
+                await mouse.scrollRight(Number(config.scrollIntensity))
               }
               else if (command.toLowerCase() == 'leftclick') {
                 await mouse.pressButton(Button.LEFT)
