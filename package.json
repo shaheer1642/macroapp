@@ -1,31 +1,32 @@
 {
   "name": "macroapp",
   "productName": "MacroApp",
-  "version": "1.0",
+  "version": "1.0.2",
   "description": "Simple Macro App",
   "keywords": [
   ],
-  "homepage": "https://github.com/MrSofty123/macroapp#readme",
+  "homepage": "https://github.com/shaheer1642/macroapp#readme",
   "bugs": {
-    "url": "https://github.com/MrSofty123/macroapp/issues"
+    "url": "https://github.com/shaheer1642/macroapp/issues"
   },
   "repository": {
     "type": "git",
-    "url": "https://github.com/MrSofty123/macroapp.git"
+    "url": "https://github.com/shaheer1642/macroapp.git"
   },
   "license": "MIT",
   "author": {
-    "name": "MrSofty123",
+    "name": "shaheer1642",
     "email": "shaheer1642@gmail.com"
   },
   "main": "./src/main/main.ts",
   "scripts": {
     "build": "concurrently \"npm run build:main\" \"npm run build:renderer\"",
+    "deploy": "electron-builder build --publish always",
     "build:main": "cross-env NODE_ENV=production TS_NODE_TRANSPILE_ONLY=true webpack --config ./.erb/configs/webpack.config.main.prod.ts",
     "build:renderer": "cross-env NODE_ENV=production TS_NODE_TRANSPILE_ONLY=true webpack --config ./.erb/configs/webpack.config.renderer.prod.ts",
     "postinstall": "ts-node .erb/scripts/check-native-dep.js && electron-builder install-app-deps && cross-env NODE_ENV=development TS_NODE_TRANSPILE_ONLY=true webpack --config ./.erb/configs/webpack.config.renderer.dev.dll.ts",
     "lint": "cross-env NODE_ENV=development eslint . --ext .js,.jsx,.ts,.tsx",
-    "package": "ts-node ./.erb/scripts/clean.js dist && npm run build && electron-builder build --publish always",
+    "package": "ts-node ./.erb/scripts/clean.js dist && npm run build && electron-builder build --publish never",
     "prepare": "husky install",
     "rebuild": "electron-rebuild --parallel --types prod,dev,optional --module-dir release/app",
     "start": "ts-node ./.erb/scripts/check-port-in-use.js && npm run start:renderer",
@@ -176,8 +177,8 @@
     "webpack-merge": "^5.8.0"
   },
   "build": {
-    "productName": "ElectronReact",
-    "appId": "org.erb.ElectronReact",
+    "productName": "MacroApp",
+    "appId": "com.electron.macroapp",
     "asar": true,
     "asarUnpack": "**\\*.{node,dll}",
     "files": [
@@ -217,7 +218,10 @@
     "win": {
       "target": [
         "nsis"
-      ]
+      ],
+      "asar": true,
+      "icon": "./assets/icon.png",
+      "legalTrademarks": "(c) 2022 @shaheer1642"
     },
     "linux": {
       "target": [
@@ -235,12 +239,9 @@
     ],
     "publish": {
       "provider": "github",
-      "owner": "MrSofty123",
+      "owner": "shaheer1642",
       "repo": "macroapp"
     }
-  },
-  "collective": {
-    "url": "https://opencollective.com/electron-react-boilerplate-594"
   },
   "devEngines": {
     "node": ">=14.x",

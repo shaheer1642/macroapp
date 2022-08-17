@@ -14,10 +14,9 @@ import { autoUpdater } from 'electron-updater';
 import log from 'electron-log';
 import MenuBuilder from './menu';
 import { resolveHtmlPath } from './util';
-import fs, { cp } from 'fs'
+import fs  from 'fs'
 import Os from 'os'
-import {keyboard, Key, getActiveWindow} from "@nut-tree/nut-js"
-import { textFieldClasses } from '@mui/material';
+import {keyboard, Key} from "@nut-tree/nut-js"
 
 const appDocPath = Os.homedir() + '/Documents/MacroApp/'
 
@@ -113,6 +112,7 @@ const createWindow = async () => {
 
   mainWindow = new BrowserWindow({
     show: false,
+    title: 'MacroApp',
     width: 800,
     height: 400,
     icon: getAssetPath('icon.png'),
@@ -120,7 +120,7 @@ const createWindow = async () => {
       preload: app.isPackaged
         ? path.join(__dirname, 'preload.js')
         : path.join(__dirname, '../../.erb/dll/preload.js'),
-    },
+    }
   });
 
   mainWindow.loadURL(resolveHtmlPath('index.html'));

@@ -39,7 +39,7 @@ class MainApp extends React.Component<IMainAppProps,IMainAppState> {
   
   render() {
     return (
-      <div style={{overflowY:'auto',maxHeight:"100vh", overflowX: 'auto', maxWidth: '95vw'}}>
+      <div>
         {this.state.update}
         {hotkeys.map((hotkey,hotkeyIndex) => {
           return (
