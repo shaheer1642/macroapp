@@ -16,7 +16,8 @@ import MenuBuilder from './menu';
 import { resolveHtmlPath } from './util';
 import fs  from 'fs'
 import Os from 'os'
-import {keyboard, Key} from "@nut-tree/nut-js"
+import {keyboard, Key, mouse, sleep, Button} from "@nut-tree/nut-js"
+import { left } from '@nut-tree/nut-js';
 
 const appDocPath = Os.homedir() + '/Documents/MacroApp/'
 
@@ -24,6 +25,7 @@ try {
   fs.mkdirSync(appDocPath);
 } catch (e) {}
 if (!fs.existsSync(appDocPath + 'hotkeys.json')) fs.writeFileSync(appDocPath + 'hotkeys.json','[{"commands":["Select"],"hotkey":"Select"}]')
+if (!fs.existsSync(appDocPath + 'config.json')) fs.writeFileSync(appDocPath + 'config.json','{"keyboardDelay": 10, "mouseDelay": 6}')
 
 
 class AppUpdater {
@@ -37,8 +39,19 @@ class AppUpdater {
 let mainWindow: BrowserWindow | null = null;
 
 var hotkeys: any = []
+var config: any = {keyboardDelay: 10, mouseDelay: 6, customCommand1ScrollRate: 20}
 
 ipcMain.on('ipc-example', async (event, arg) => {
+  if ((arg as any)[0].query == 'fetchConfig') {
+    fs.readFile(appDocPath + 'config.json', 'utf8', function(err, data){
+      config = JSON.parse(data)
+      console.log('$$$$$$$$$$$read file config.json ')
+      event.reply('ipc-example', [{
+        query: 'fetchConfig',
+        data: JSON.parse(data)
+      }]);
+    });
+  }
   if ((arg as any)[0].query == 'fetchHotkeys') {
     fs.readFile(appDocPath + 'hotkeys.json', 'utf8', function(err, data){
       hotkeys = JSON.parse(data)
@@ -58,6 +71,18 @@ ipcMain.on('ipc-example', async (event, arg) => {
       else {
         console.log('$$$$$$$$$$$written to file hotkeys.json ')
         hotkeys = typeof ((arg as any)[0].data) == 'object' ? (arg as any)[0].data:JSON.parse((arg as any)[0].data)
+        globalShortcut.unregisterAll()
+        registerGlobalHotkeys()
+      }
+    });
+  }
+  if ((arg as any)[0].query == 'saveConfig') {
+    fs.writeFile(appDocPath + 'config.json', typeof ((arg as any)[0].data) == 'string' ? (arg as any)[0].data:JSON.stringify((arg as any)[0].data), (err) => {
+      if (err)
+        console.log(err);
+      else {
+        console.log('$$$$$$$$$$$written to file config.json ')
+        config = typeof ((arg as any)[0].data) == 'object' ? (arg as any)[0].data:JSON.parse((arg as any)[0].data)
         globalShortcut.unregisterAll()
         registerGlobalHotkeys()
       }
@@ -114,7 +139,7 @@ const createWindow = async () => {
     show: false,
     title: 'MacroApp',
     width: 800,
-    height: 400,
+    height: 500,
     icon: getAssetPath('icon.png'),
     webPreferences: {
       preload: app.isPackaged
@@ -186,18 +211,63 @@ const modifierKeys = [
   'RightShift'
 ]
 function registerGlobalHotkeys() {
-  keyboard.config.autoDelayMs = 10
+  keyboard.config.autoDelayMs = config.keyboardDelay
+  mouse.config.autoDelayMs = config.mouseDelay
   hotkeys.forEach((hotkey:any) => {
     if (hotkey.hotkey.toLowerCase() != 'select') {
       try {
         const ret = globalShortcut.register(hotkey.hotkey, async () => {
           console.log(`${hotkey.hotkey} is pressed`)
+
+          if (hotkey.commands[0].toLowerCase() == 'customcommand1') {
+            await keyboard.pressKey(Key.LeftControl)
+            await keyboard.pressKey(Key.S)
+  
+            for (var i=0; i<Number(config.customCommand1ScrollRate); i++) {
+              await mouse.scrollDown(150)
+            }
+  
+            await keyboard.releaseKey(Key.S)
+            await keyboard.releaseKey(Key.LeftControl)
+            return
+          }
+          if (hotkey.commands[0].toLowerCase() == 'customcommand2') {
+            await keyboard.pressKey(Key.E)
+            await keyboard.releaseKey(Key.E)
+            await sleep(200)
+            await mouse.pressButton(Button.RIGHT)
+            await mouse.pressButton(Button.LEFT)
+            await mouse.releaseButton(Button.LEFT)
+            await mouse.releaseButton(Button.RIGHT)
+            return
+          }
+
           var releasekeys = []
           for (const command of hotkey.commands) {
             if (command.toLowerCase() != 'select') {
               if (modifierKeys.includes(command)) {
                 await keyboard.pressKey(Key[command])
                 releasekeys.push(command)
+              }
+              else if (command.toLowerCase() == 'wheeldown') {
+                await mouse.scrollDown(100)
+              }
+              else if (command.toLowerCase() == 'wheelup') {
+                await mouse.scrollUp(100)
+              }
+              else if (command.toLowerCase() == 'wheelleft') {
+                await mouse.scrollLeft(100)
+              }
+              else if (command.toLowerCase() == 'wheelright') {
+                await mouse.scrollRight(100)
+              }
+              else if (command.toLowerCase() == 'leftclick') {
+                await mouse.pressButton(Button.LEFT)
+                await mouse.releaseButton(Button.LEFT)
+              }
+              else if (command.toLowerCase() == 'rightclick') {
+                await mouse.pressButton(Button.RIGHT)
+                await mouse.releaseButton(Button.RIGHT)
               }
               else {
                 await keyboard.pressKey(Key[command])

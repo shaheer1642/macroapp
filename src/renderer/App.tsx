@@ -2,16 +2,23 @@ import { MemoryRouter as Router, Routes, Route } from 'react-router-dom';
 import React from 'react'
 import './App.css';
 
-
 import {rendererEvent} from './eventHandler'
-import { Typography , Button, Checkbox} from '@mui/material';
+import { Typography , Button, Checkbox, TextField} from '@mui/material';
 
 var hotkeys: Array<any> = []
+var config: any = {
+  keyboardDelay: 10,
+  mouseDelay: 6,
+  customCommand1ScrollRate: 50
+}
 
 interface IMainAppProps {
 }
 interface IMainAppState {
   update: boolean,
+  textFieldKeyboardDelay: number,
+  textFieldMouseDelay: number,
+  customCommand1ScrollRate: number
 }
 
 class MainApp extends React.Component<IMainAppProps,IMainAppState> {
@@ -19,18 +26,29 @@ class MainApp extends React.Component<IMainAppProps,IMainAppState> {
     super(props);
     this.state = {
       update: false,
+      textFieldKeyboardDelay: config.keyboardDelay,
+      textFieldMouseDelay: config.mouseDelay,
+      customCommand1ScrollRate: config.customCommand1ScrollRate
     };
   }
   
   componentDidMount() {
-      rendererEvent.on('fetchedHotkeys', (data) => {
-        console.log('$$$$$$$$$$$rendererEvent fetchHotkeys')
-          hotkeys = []
-          this.setState({update: !this.state.update}, () => {
-              hotkeys = typeof data == 'object' ? data:JSON.parse(data as string)
-              this.setState({update: !this.state.update})
-          });
-      });
+    rendererEvent.on('fetchedHotkeys', (data) => {
+      console.log('$$$$$$$$$$$rendererEvent fetchHotkeys')
+        hotkeys = []
+        this.setState({update: !this.state.update}, () => {
+            hotkeys = typeof data == 'object' ? data:JSON.parse(data as string)
+            this.setState({update: !this.state.update})
+        });
+    });
+    rendererEvent.on('fetchedConfig', (data) => {
+      console.log('$$$$$$$$$$$rendererEvent fetchHotkeys')
+        config = []
+        this.setState({update: !this.state.update}, () => {
+            config = typeof data == 'object' ? data:JSON.parse(data as string)
+            this.setState({textFieldKeyboardDelay: config.keyboardDelay, textFieldMouseDelay: config.mouseDelay, customCommand1ScrollRate: config.customCommand1ScrollRate})
+        });
+    });
   }
 
   componentDidUpdate() {
@@ -114,6 +132,57 @@ class MainApp extends React.Component<IMainAppProps,IMainAppState> {
             rendererEvent.emit('fetchHotkeys')
           }}>Discard</Button>
         </div>
+        <div style={{height: '10px'}}></div>
+        <div style={{display: 'flex',alignItems: 'center',color:'white'}}>
+          <TextField
+            error
+            sx={{ input: { color: 'white' } }}
+            label="Keypress Delay"
+            type="number"
+            variant="filled"
+            value={this.state.textFieldKeyboardDelay}
+            color='error'
+            style={{width: '120px'}}
+            onChange={(e:any) => {
+              this.setState({textFieldKeyboardDelay: e.target.value})
+              config.keyboardDelay = e.target.value
+              rendererEvent.emit('saveConfig', config)
+            }}
+          />
+          <div style={{width: '10px'}}></div>
+          <TextField
+            error
+            sx={{ input: { color: 'white' }}}
+            label="Mousescroll Delay"
+            type="number"
+            variant="filled"
+            value={this.state.textFieldMouseDelay}
+            style={{width: '120px'}}
+            onChange={(e:any) => {
+              this.setState({textFieldMouseDelay: e.target.value})
+              config.mouseDelay = e.target.value
+              rendererEvent.emit('saveConfig', config)
+            }}
+          />
+        </div>
+        <p>Custom Command 1 Setting</p>
+        <div style={{display: 'flex',alignItems: 'center',color:'white'}}>
+          <TextField
+            error
+            sx={{ input: { color: 'white' } }}
+            label="Scroll Rate"
+            type="number"
+            variant="filled"
+            value={this.state.customCommand1ScrollRate}
+            color='error'
+            style={{width: '120px'}}
+            onChange={(e:any) => {
+              this.setState({customCommand1ScrollRate: e.target.value})
+              config.customCommand1ScrollRate = e.target.value
+              rendererEvent.emit('saveConfig', config)
+            }}
+          />
+        </div>
       </div>
     )
   }
@@ -130,7 +199,15 @@ export default function App() {
 }
 
 const keys = {
-  Select: -1,
+  Select: -100,
+  customCommand1: -8,
+  customCommand2: -7,
+  LeftClick: -6,
+  RightClick: -5,
+  WheelDown: -4,
+  WheelUp: -3,
+  WheelRight: -2,
+  WheelLeft: -1,
   Space: 0,
   Escape: 1,
   Tab: 2,

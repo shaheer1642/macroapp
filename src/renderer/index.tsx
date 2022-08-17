@@ -12,9 +12,17 @@ window.electron.ipcRenderer.on('ipc-example', (arg) => {
     console.log('$$$$$$$$$$$response fetchHotkeys')
     rendererEvent.emit('fetchedHotkeys', (arg as any)[0].data)
   }
+  if ((arg as any)[0].query == 'fetchConfig') {
+    console.log('$$$$$$$$$$$response fetchHotkeys')
+    rendererEvent.emit('fetchedConfig', (arg as any)[0].data)
+  }
 });
 window.electron.ipcRenderer.sendMessage('ipc-example', [{
   query: 'fetchHotkeys',
+  data: {}
+}]);
+window.electron.ipcRenderer.sendMessage('ipc-example', [{
+  query: 'fetchConfig',
   data: {}
 }]);
 
@@ -27,6 +35,12 @@ rendererEvent.on('fetchHotkeys', () => {
 rendererEvent.on('saveHotkeys', (data) => {
   window.electron.ipcRenderer.sendMessage('ipc-example', [{
     query: 'saveHotkeys',
+    data: data
+  }]);
+})
+rendererEvent.on('saveConfig', (data) => {
+  window.electron.ipcRenderer.sendMessage('ipc-example', [{
+    query: 'saveConfig',
     data: data
   }]);
 })
