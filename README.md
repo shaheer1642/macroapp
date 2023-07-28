@@ -7,7 +7,7 @@ This simple macro app can be used to simulate keyboard input commands with the h
 - MUI
 
 # Screenshots
-
+![image](https://github.com/shaheer1642/macroapp/assets/90972275/40b696c9-2e98-43c3-9704-ea28740f0eb3)
 
 # Running the code
 - First install the node modules using the command: `npm install`
